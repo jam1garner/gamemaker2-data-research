@@ -229,6 +229,77 @@ struct SHDR {
     uint offsets[count]<bgcolor=cYellow>;
 };
 
+struct EXTN_function_import {
+    uint stringOffset1<bgcolor=cLtGreen>;
+    uint unk1<bgcolor=cLtPurple>;
+    uint unk2<bgcolor=cLtPurple>;
+    uint unk3<bgcolor=cLtPurple>;
+    uint stringOffset2<bgcolor=cLtGreen>;
+    uint unk4<bgcolor=cLtPurple>;
+    uint unk5<bgcolor=cLtPurple>;
+    uint unk6<bgcolor=cLtPurple>;
+    uint unk7<bgcolor=cLtPurple>;
+    local uint temp = FTell();
+    FSeek(stringOffset1);
+    string string1<bgcolor=cGreen>;
+    FSeek(stringOffset2);
+    string string2<bgcolor=cGreen>;
+    FSeek(temp);
+};
+
+struct EXTN_extension_file {
+    uint stringOffset1<bgcolor=cLtGreen>;
+    uint stringOffset2<bgcolor=cLtGreen>;
+    uint stringOffset3<bgcolor=cLtGreen>;
+    uint unk<bgcolor=cLtPurple>;
+    uint count<bgcolor=cLtBlue>;
+    uint offsets[count]<bgcolor=cYellow>;
+    local uint temp = FTell();
+    FSeek(stringOffset1);
+    string string1<bgcolor=cGreen>;
+    FSeek(stringOffset2);
+    string string2<bgcolor=cGreen>;
+    FSeek(stringOffset3);
+    string string3<bgcolor=cGreen>;
+    local int i;
+    for(i = 0; i < count; i++){
+        FSeek(offsets[i]);
+        EXTN_function_import import;
+    }
+    FSeek(temp);
+};
+
+struct EXTN_extension {
+    uint stringOffset1<bgcolor=cLtGreen>;
+    uint stringOffset2<bgcolor=cLtGreen>;
+    uint stringOffset3<bgcolor=cLtGreen>;
+    uint count<bgcolor=cLtBlue>;
+    uint offsets[count]<bgcolor=cYellow>;
+    local uint temp = FTell();
+    FSeek(stringOffset1);
+    string string1<bgcolor=cGreen>;
+    FSeek(stringOffset2);
+    string string2<bgcolor=cGreen>;
+    FSeek(stringOffset3);
+    string string3<bgcolor=cGreen>;
+    local int i;
+    for(i = 0; i < count; i++){
+        FSeek(offsets[i]);
+        EXTN_extension_file file;
+    }
+    FSeek(temp);
+};
+
+struct EXTN {
+    uint count<bgcolor=cLtBlue>;
+    uint offsets[count]<bgcolor=cYellow>;
+    local int i;
+    for(i = 0; i < count; i++){
+        FSeek(offsets[i]);
+        EXTN_extension extension;
+    }
+};
+
 local uint nextPos;
 while(!FEof()){
     struct SectionHeader {
@@ -255,6 +326,8 @@ while(!FEof()){
             GEN8 metadata;
         if(Strcmp(magic, "SHDR") == 0)
             SHDR shaders;
+        if(Strcmp(magic, "EXTN") == 0)
+            EXTN externs;
     } section;
     FSeek(nextPos);
 }
